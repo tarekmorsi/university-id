@@ -176,7 +176,7 @@ module.exports.findSessionAndUpdateAccessPoint = async (sessions, id, status) =>
 	try {
 		let edit = false
 		for(i = 0; i<sessions.length; i++){
-			if(sessions[i]._id == id && sessions[i].status != "attended"){
+			if(sessions[i]._id == id && sessions[i].status == "pending"){
 				sessions[i].status = status
 				edit = true
 				return edit
