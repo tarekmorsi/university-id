@@ -124,7 +124,7 @@ async updateSession(req, res) {
     							})
     						} else {
 
-    							let edit = await Student.findSessionAndUpdate(student.sessions, req.body.id, req.body.status)
+    							let edit = await Student.findSessionAndUpdateAccessPoint(student.sessions, req.body.id, req.body.status)
 
     							if(edit){
     								let updatedStudent = await Student.updateStudent(student._id, student)
