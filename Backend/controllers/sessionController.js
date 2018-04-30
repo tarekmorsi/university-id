@@ -100,6 +100,64 @@ async updateSession(req, res) {
   		}
   },
 
+  async updateSessionUsingAccessPoint(req, res) {
+    			try {
+    					try {
+                req.checkBody('phoneNumber', 'Student Number is required').notEmpty()
+    						req.checkBody('id', 'Session ID is required').notEmpty()
+    						req.checkBody('status', 'Status is required').notEmpty()
+
+    						let errors = await req.validationErrors()
+    						if (errors) {
+    								return res.status(400).json({
+    									success: false,
+    									msg: errors
+    								})
+    						}
+
+    						let student = await Student.getStudentByNumber(req.body.phoneNumber)
+
+    						if (!student) {
+    							return res.status(404).json({
+    								success: false,
+    								msg: "Student not found"
+    							})
+    						} else {
+
+    							let edit = await Student.findSessionAndUpdate(student.sessions, req.body.id, req.body.status)
+
+    							if(edit){
+    								let updatedStudent = await Student.updateStudent(student._id, student)
+    								return res.status(200).json(updatedStudent)
+    							}else{
+    								return res.status(404).json({
+    									success: false,
+    									msg: "Session not found."
+    								})
+    							}
+
+
+    						}
+
+    				} catch (err) {
+              console.log(err)
+    							return res.status(500).json({
+    								success: false,
+    								msg: err
+    							})
+    					}
+
+
+
+    			} catch (err) {
+    					return res.status(500).json({
+    						success: false,
+    						msg: err
+    			})
+    		}
+    },
+
+
 
 
 

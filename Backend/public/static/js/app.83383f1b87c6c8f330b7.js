@@ -1029,15 +1029,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     addSessions: function () {
       console.log(this.selected_students);
-      var hour = Number(this.time.slice(0, 2));
-      if (hour + 2 > 24) {
-        var hour_total = hour + 2;
-        hour = hour_total - 24;
-      } else {
-        hour = hour + 2;
-      }
+      var hour = Number(this.time.slice(0, 2)
+      // if(hour+2>24){
+      //   var hour_total = hour + 2
+      //   hour = hour_total - 24
+      // }else{
+      //   hour = hour +2
+      // }
 
-      this.$http.post(__WEBPACK_IMPORTED_MODULE_0__env___default.a.URL + '/admin/sessions', {
+      );this.$http.post(__WEBPACK_IMPORTED_MODULE_0__env___default.a.URL + '/admin/sessions', {
         title: this.title,
         location: this.location,
         day: this.day,
@@ -1740,4 +1740,4 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
 
 /***/ })
 ],[5]);
-//# sourceMappingURL=app.59ffb6f15f1ab295c470.js.map
+//# sourceMappingURL=app.83383f1b87c6c8f330b7.js.map

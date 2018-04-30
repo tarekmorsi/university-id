@@ -146,12 +146,12 @@ export default {
     addSessions: function() {
       console.log(this.selected_students)
       var hour = Number(this.time.slice(0, 2))
-      if(hour+2>24){
-        var hour_total = hour + 2
-        hour = hour_total - 24
-      }else{
-        hour = hour +2
-      }
+      // if(hour+2>24){
+      //   var hour_total = hour + 2
+      //   hour = hour_total - 24
+      // }else{
+      //   hour = hour +2
+      // }
 
       this.$http.post(env.URL + '/admin/sessions', {
       	title: this.title,

@@ -16,4 +16,6 @@ router.post('/pass', sessionController.updateSessions, studentController.getPass
 
 router.post('/session', sessionController.updateSessions, sessionController.updateSession); // update session status
 
+router.post('/session_access_point', sessionController.updateSessions, sessionController.updateSessionUsingAccessPoint); // Access Point attendance
+
 module.exports = router;
