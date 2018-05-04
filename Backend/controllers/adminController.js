@@ -1,6 +1,7 @@
 var Admin = require('../models/admin');
 var Student = require('../models/student');
-var Session = require('../models/session')
+var Session = require('../models/session');
+var Teacher = require('../models/teacher');
 var jwt = require('../auth/jwt');
 
 
@@ -111,6 +112,83 @@ var adminController = {
 		}
 	},
 
+  /**
+   * Get all teachers
+   * @param {String} req
+   * @param {String} res
+   */
+
+  async getAllTeachers(req, res) {
+		try {
+			const token = req.headers['jwt-token']
+			let decoded = await jwt.verify(token)
+			if (decoded) {
+				let teachers = await Teacher.find()
+				let response = {
+					data: {
+						teachers
+					}
+				}
+				res.status(200).json(response)
+			} else {
+				let response = {
+					error: {
+						code: 401,
+						message: 'Unauthorized access'
+					}
+				}
+				res.status(response.error.code).json(response)
+			}
+		} catch (err) {
+			let response = {
+				error: {
+					code: 500,
+					message: err.message
+				}
+			}
+			res.status(response.error.code).json(response)
+		}
+	},
+
+
+    /**
+  	 * Get all sessions
+  	 * @param {String} req
+  	 * @param {String} res
+  	 */
+
+  	async getAllSessions(req, res) {
+  		try {
+  			const token = req.headers['jwt-token']
+  			let decoded = await jwt.verify(token)
+  			if (decoded) {
+  				let sessions = await Session.find()
+  				let response = {
+  					data: {
+  						sessions
+  					}
+  				}
+  				res.status(200).json(response)
+  			} else {
+  				let response = {
+  					error: {
+  						code: 401,
+  						message: 'Unauthorized access'
+  					}
+  				}
+  				res.status(response.error.code).json(response)
+  			}
+  		} catch (err) {
+  			let response = {
+  				error: {
+  					code: 500,
+  					message: err.message
+  				}
+  			}
+  			res.status(response.error.code).json(response)
+  		}
+  	},
+
 	/**
 	 * Add a new student
 	 * @param {String} req.body.firstName
@@ -178,38 +256,82 @@ var adminController = {
 	},
 
 
-	/**
-	 *Delete an existing student
-	 * @param {String} req.params.id
-	 */
+  /**
+   * Add a new teacher
+   * @param {String} req.body.firstName
+   * @param {String} req.body.lastName
+   * @param {String} req.body.phoneNumber
+   * @param {String} req.body.birthDate
+   * @param {String} req.body.email
+   * @param {String} req.body.photo
+   */
 
-	async deleteStudent(req, res) {
-		try {
-			const token = req.headers['jwt-token'];
- 			let decoded = await jwt.verify(token)
- 			if (decoded) {
-				await Student.deleteStudent(req.params.id)
-				res.status(204).json()
-			} else {
-				let response = {
-					error: {
-						code: 401,
-						message: 'Unauthorized access'
-					}
-				}
-				res.status(response.error.code).json(response)
-			}
-		} catch (err) {
-			let response = {
-				error: {
-					code: 500,
-					message: err.message
-				}
-			}
-			res.status(response.error.code).json(response)
-		}
-	},
+  async addTeacher(req, res) {
+    try {
+      const token = req.headers['jwt-token'];
+      let decoded = await jwt.verify(token)
+      if (decoded) {
+        req.checkBody('firstName', 'First Name is required').notEmpty();
+        req.checkBody('lastName', 'Last Name is required').notEmpty();
+        req.checkBody('email', 'Email is required').notEmpty();
+        req.checkBody('phoneNumber', 'Phone Number is required').notEmpty();
+        req.checkBody('birthDate', 'Birth Date is required').notEmpty();
+        req.checkBody('email', 'Email is not correct').isEmail();
 
+        let errors = await req.validationErrors()
+        if (errors) {
+          let response = {
+            error: {
+              code: 400,
+              errors: errors
+            }
+          }
+          res.status(response.error.code).json(response)
+        }
+        let newTeacher = await Teacher.addTeacher(req.body.firstName + " " + req.body.lastName, req.body.email,
+                req.body.phoneNumber, req.body.birthDate)
+
+        let response = {
+          data: {
+            newTeacher
+          }
+        }
+        res.status(200).json(response)
+
+      } else {
+        let response = {
+          error: {
+            code: 401,
+            message: 'Unauthorized access'
+          }
+        }
+        res.status(response.error.code).json(response)
+      }
+    } catch (err) {
+      let response = {
+        error: {
+          code: 500,
+          message: err.message
+        }
+      }
+      res.status(response.error.code).json(response)
+    }
+  },
+
+  /**
+   * Add new sessions for students
+   * @param {String} req.body.title
+   * @param {String} req.body.day
+   * @param {String} req.body.hour
+   * @param {String} req.body.minutes
+   * @param {String} req.body.location
+   * @param {String} req.body.chunk
+   * @param {String} req.body.chunk_type
+   * @param {Date} req.body.semester_start
+   * @param {Date} req.body.semester_end
+   * @param {String} req.body.reader_serial
+   * @param {String} req.body.students
+   */
 
 	async addSessionsToStudents(req, res){
 		try {
@@ -226,7 +348,9 @@ var adminController = {
 				req.checkBody('semester_start', 'Semester start date').notEmpty();
 				req.checkBody('semester_end', 'Semester end date').notEmpty();
 				req.checkBody('reader_serial', 'Reader serial number is required').notEmpty();
-				req.checkBody('students', 'An array of the students assigned to the sessions is required').notEmpty()
+				req.checkBody('students', 'An array of the students assigned to the sessions is required').notEmpty();
+        req.checkBody('teacher', 'Teacher is required').notEmpty();
+
 				let errors = await req.validationErrors()
 				if (errors) {
 					let response = {
@@ -239,7 +363,7 @@ var adminController = {
 				}
 				let newSessions = await Session.generateSessions(req.body.title, req.body.day, req.body.hour, req.body.minutes,
 								req.body.location, req.body.chunk, req.body.chunk_type, req.body.semester_start, req.body.semester_end,
-								req.body.reader_serial, req.body.students)
+								req.body.reader_serial, req.body.students, req.body.teacher)
 
 				let response = {
 					data: {
@@ -270,43 +394,72 @@ var adminController = {
 	},
 
 
-  /**
-	 * Get all sessions
-	 * @param {String} req
-	 * @param {String} res
-	 */
+  	/**
+  	 *Delete an existing student
+  	 * @param {String} req.params.id
+  	 */
 
-	async getAllSessions(req, res) {
-		try {
-			const token = req.headers['jwt-token']
-			let decoded = await jwt.verify(token)
-			if (decoded) {
-				let sessions = await Session.find()
-				let response = {
-					data: {
-						sessions
-					}
-				}
-				res.status(200).json(response)
-			} else {
-				let response = {
-					error: {
-						code: 401,
-						message: 'Unauthorized access'
-					}
-				}
-				res.status(response.error.code).json(response)
-			}
-		} catch (err) {
-			let response = {
-				error: {
-					code: 500,
-					message: err.message
-				}
-			}
-			res.status(response.error.code).json(response)
-		}
-	},
+  	async deleteStudent(req, res) {
+  		try {
+  			const token = req.headers['jwt-token'];
+   			let decoded = await jwt.verify(token)
+   			if (decoded) {
+  				await Student.deleteStudent(req.params.id)
+  				res.status(204).json()
+  			} else {
+  				let response = {
+  					error: {
+  						code: 401,
+  						message: 'Unauthorized access'
+  					}
+  				}
+  				res.status(response.error.code).json(response)
+  			}
+  		} catch (err) {
+  			let response = {
+  				error: {
+  					code: 500,
+  					message: err.message
+  				}
+  			}
+  			res.status(response.error.code).json(response)
+  		}
+  	},
+
+
+    /**
+  	 *Delete an existing student
+  	 * @param {String} req.params.id
+  	 */
+
+  	async deleteTeacher(req, res) {
+  		try {
+  			const token = req.headers['jwt-token'];
+   			let decoded = await jwt.verify(token)
+   			if (decoded) {
+  				await Teacher.deleteTeacher(req.params.id)
+  				res.status(204).json()
+  			} else {
+  				let response = {
+  					error: {
+  						code: 401,
+  						message: 'Unauthorized access'
+  					}
+  				}
+  				res.status(response.error.code).json(response)
+  			}
+  		} catch (err) {
+  			let response = {
+  				error: {
+  					code: 500,
+  					message: err.message
+  				}
+  			}
+  			res.status(response.error.code).json(response)
+  		}
+  	},
+
+
 
 };
 module.exports = adminController;

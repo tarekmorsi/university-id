@@ -53,6 +53,7 @@ app.all('*', function (req, res, next) {
 	res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
 	res.header("Access-Control-Allow-Credentials", "true");
 	res.header("Access-Control-Allow-Headers", "Authorization, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+	res.header('Content-Type', 'application/json');
 	res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
 	res.header('Expires', '-1');
 	res.header('Pragma', 'no-cache');
@@ -63,9 +64,12 @@ app.all('*', function (req, res, next) {
 
 var adminRoutes = require('./routes/adminRoutes')
 var studentRoutes = require('./routes/studentRoutes')
+var teacherRoutes = require('./routes/teacherRoutes')
+
 
 app.use('/admin', adminRoutes)
 app.use('/student', studentRoutes)
+app.use('/teacher', teacherRoutes)
 
 // Starting the server
 app.listen(port, () => {

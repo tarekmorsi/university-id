@@ -1,7 +1,8 @@
 var imageUpload = require('../config/imageUpload');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-
+var Teacher = require('../models/teacher');
+var Admin = require('../models/admin');
 
 // define the schema for the Student model
 
@@ -13,6 +14,7 @@ const sessionSchema =  new Schema({
 	chunk_type: String,
 	status: String,
 	reader_serial:String,
+	teacher:String
 });
 
 var studentSchema = new Schema({
@@ -73,15 +75,34 @@ module.exports.getStudentById = async (id) => {
 	}
 }
 
+module.exports.getStudentByEmail = async (email) => {
+	try {
+		const query = {
+			email: email
+		}
+		let student = await Student.findOne(query)
+		return student
+	} catch (err) {
+		throw err
+	}
+}
+
 module.exports.addStudent = async (name, email, phoneNumber, id, birthDate, group, photo) => {
 	try {
+		let teacher = await Teacher.getTeacherByNumber(phoneNumber)
 		let student = await Student.getStudentByNumber(phoneNumber)
-		if (student) {
-			let student = new Student({
-				phoneNumber: phoneNumber
-			})
-			let newStudent = await student.save()
-			return newStudent
+		let teacher2 = await Teacher.getTeacherByEmail(email)
+		let student2 = await Student.getStudentByEmail(email)
+		let admin = await Admin.getAdminByEmail(email)
+
+		if (teacher || student || teacher2 || student2 || admin) {
+			let response = {
+				error: {
+					code: 401,
+					message: 'Duplicate Phone Number or Email'
+				}
+			}
+			return response
 
 		} else {
 			if (photo) {
@@ -95,8 +116,8 @@ module.exports.addStudent = async (name, email, phoneNumber, id, birthDate, grou
 					email: email,
 					id: id,
 					image: imageurl,
-					serial: "AAAAAAAAABYAAAAAAAAAAAEAAAAAAA==",
-					serial_signature: "KhgcLZNUijU5RFIhBRzOZApz2qQZ0hg+srE5ZQZh09yHxydLq3WwI6udC5pq8mt/Z9l4YUpTi6/jfP7NFRJ85a/bFOC5bHVVm2ZrPtNTHevMEt2WL1it3p3AJKoQqE5YOFvVI4i5LDz/aoDr/VvKI29AuoIaOolt+OHrFM3Pp+A="
+					serial: "AAAAAAABEfsBAAAAAAAAAAABAVsOWNQ=",
+					serial_signature: "qQwaiqobGUWliP03UFsAzAP1RjdxmVK+J9EltRnL1SV7sNvmG28zCoiACC2hJY4kOZlFbLCchrVA8SXZDGw1/Q=="
 				})
 
 				let newStudent = await student.save()
@@ -111,8 +132,8 @@ module.exports.addStudent = async (name, email, phoneNumber, id, birthDate, grou
 					email: email,
 					id: id,
 					photo: "http://www.freelanceme.net/Images/default%20profile%20picture.png",
-					serial: "AAAAAAAAABYAAAAAAAAAAAEAAAAAAA==",
-					serial_signature: "KhgcLZNUijU5RFIhBRzOZApz2qQZ0hg+srE5ZQZh09yHxydLq3WwI6udC5pq8mt/Z9l4YUpTi6/jfP7NFRJ85a/bFOC5bHVVm2ZrPtNTHevMEt2WL1it3p3AJKoQqE5YOFvVI4i5LDz/aoDr/VvKI29AuoIaOolt+OHrFM3Pp+A="
+					serial: "AAAAAAABEfsBAAAAAAAAAAABAVsOWNQ=",
+					serial_signature: "qQwaiqobGUWliP03UFsAzAP1RjdxmVK+J9EltRnL1SV7sNvmG28zCoiACC2hJY4kOZlFbLCchrVA8SXZDGw1/Q=="
 
 				})
 

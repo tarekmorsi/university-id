@@ -23,5 +23,11 @@ router.post('/sessions', sessionController.updateSessions, adminController.addSe
 
 router.get('/sessions', sessionController.updateSessions, adminController.getAllSessions); // Admin can get all sessions created
 
+router.post('/teacher', imageUpload.upload.any(), sessionController.updateSessions, adminController.addTeacher); // Admin can add a teacher
+
+router.get('/teachers', sessionController.updateSessions, adminController.getAllTeachers); // Admin can get all sessions created
+
+router.delete('/teacher/:id', sessionController.updateSessions, adminController.deleteTeacher); // Admin can delete a student
+
 
 module.exports = router;

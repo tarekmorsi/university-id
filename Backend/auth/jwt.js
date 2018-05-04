@@ -1,9 +1,12 @@
 const jwt = require('jsonwebtoken')
 const Admin = require('../models/admin')
 const Student = require('../models/student')
+const Teacher = require('../models/teacher')
 const secret = 'ilovescotchscotchyscotchscotch'
 const secretStudent = 'demodemopassappdemodemodemopass'
 const secretAccount = 'Account'
+const secretTeacher = 'teacherteacherteacherteacher'
+
 
 
 
@@ -65,9 +68,28 @@ module.exports = {
 					}
 					return response
 				}
+			} else if (credentials.type === 'teacher'){
+				let teacher = await Teacher.getTeacherByNumber(credentials.phoneNumber)
+				if (!teacher) {
+					let response = {
+						error: {
+							code: 404,
+							message: 'Teacher not found'
+						}
+					}
+					return response
+				} else {
+					const token = await jwt.sign(teacher.toJSON(), secretTeacher)
+					let response = {
+						data: {
+							token: token,
+							teacher: teacher
+						}
+					}
+					return response
+				}
 			}
 		} catch (err) {
-			console.log(err)
 			let response = {
 				error: {
 					code: 500,
@@ -90,6 +112,15 @@ module.exports = {
 	async verifyStudent(token) {
 		try {
 			let decoded = await jwt.verify(token, secretStudent)
+			return decoded
+		} catch (err) {
+			throw err
+		}
+	},
+
+	async verifyTeacher(token) {
+		try {
+			let decoded = await jwt.verify(token, secretTeacher)
 			return decoded
 		} catch (err) {
 			throw err

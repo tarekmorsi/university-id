@@ -46,42 +46,6 @@ const studentController = {
 	},
 
 
-	async getProfile(req, res) {
-		try {
-
-			const token = req.headers['jwt-token']
-			let decoded = await jwt.verifyStudent(token)
-
-			if (decoded) {
-				let student = await Student.getStudentByNumber(decoded.phoneNumber)
-
-				if (!student) {
-					return res.status(404).json({
-						success: false,
-						msg: "Student not found"
-					})
-				} else {
-					return res.status(200).json(student)
-				}
-			}else {
-				let response = {
-					error: {
-						code: 401,
-						message: 'Unauthorized access'
-					}
-				}
-				res.status(response.error.code).json(response)
-			}
-
-		} catch (err) {
-			return res.status(500).json({
-				success: false,
-				msg: err
-			})
-		}
-	},
-
-
 	async authenticate(req, res) {
 			try {
 				req.checkBody('phoneNumber', 'Phone Number is required').notEmpty()
@@ -125,6 +89,42 @@ const studentController = {
 				})
 			}
 		},
+
+		async getProfile(req, res) {
+			try {
+
+				const token = req.headers['jwt-token']
+				let decoded = await jwt.verifyStudent(token)
+
+				if (decoded) {
+					let student = await Student.getStudentByNumber(decoded.phoneNumber)
+
+					if (!student) {
+						return res.status(404).json({
+							success: false,
+							msg: "Student not found"
+						})
+					} else {
+						return res.status(200).json(student)
+					}
+				}else {
+					let response = {
+						error: {
+							code: 401,
+							message: 'Unauthorized access'
+						}
+					}
+					res.status(response.error.code).json(response)
+				}
+
+			} catch (err) {
+				return res.status(500).json({
+					success: false,
+					msg: err
+				})
+			}
+		},
+
 
 
 };
