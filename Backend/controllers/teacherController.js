@@ -103,7 +103,10 @@ var teacherController = {
 					let sessions = await Session.findSessionsAssignedToTeacher(teacher._id)
 
 					if(sessions){
-						return res.status(200).json(sessions)
+						let response = {
+							sessions: sessions
+						}
+						return res.status(200).json(response)
 					}else{
 						let response = {
 							error: {
@@ -163,7 +166,10 @@ var teacherController = {
 						let students = await Session.findStudentsForSession(req.body.id)
 
 						if(students){
-							return res.status(200).json(students)
+							let response = {
+								students: students
+							}
+							return res.status(200).json(response)
 						}else{
 							let response = {
 								error: {
