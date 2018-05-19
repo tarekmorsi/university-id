@@ -147,7 +147,7 @@ const LOGIN_URL = API_URL + 'authenticate/';
 /***/ (function(module, exports) {
 
 module.exports = {
-  URL: "http://localhost:3000" //Backend http://localhost:3000
+  URL: "" //Backend http://localhost:3000
 };
 
 /***/ }),
@@ -2282,4 +2282,4 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
 
 /***/ })
 ],[5]);
-//# sourceMappingURL=app.970218d7345326329311.js.map
+//# sourceMappingURL=app.7611c04ca5e74f5fef0e.js.map

@@ -1,5 +1,6 @@
 var Account = require('../models/account');
-var Session = require('../models/session')
+var Session = require('../models/session');
+const twilio = require('../config/sms');
 var jwt = require('../auth/jwt');
 var Admin = Account.base.models.Admin
 var Teacher = Account.base.models.Teacher
@@ -14,42 +15,105 @@ var teacherController = {
 	 * @param {String} req.body.password
 	 */
 
-	async authenticate(req, res) {
-		try {
-			req.checkBody('phoneNumber', 'Phone number is required').notEmpty()
+	 async getPin(req, res) {
+		 try {
+			 req.checkBody('phoneNumber', 'Phone Number is required').notEmpty()
 
-			let errors = await req.validationErrors()
-			if (errors) {
-				let response = {
-					error: {
-						code: 400,
-						errors: errors
-					}
-				}
-				res.status(response.error.code).json(response)
-			}
-			let credentials = {
-				phoneNumber: req.body.phoneNumber,
-				type: 'teacher'
-			}
-			let response = await jwt.generate(credentials)
+			 let errors = await req.validationErrors()
+			 if (errors) {
+				 let response = {
+					 error: {
+						 code: 400,
+						 errors: errors
+					 }
+				 }
+				 res.status(response.error.code).json(response)
+			 }
 
-			if (response.data) {
-				return res.status(200).json(response)
-			} else {
-				return res.status(response.error.code).json(response)
-			}
 
-		} catch (err) {
-			let response = {
-				error: {
-					code: 500,
-					message: err.message
-				}
-			}
-			res.status(response.error.code).json(response)
-		}
-	},
+			 let teacher = await Teacher.getTeacherByNumber(req.body.phoneNumber)
+
+			 if (!teacher) {
+				 let response = {
+					 error: {
+						 code: 404,
+						 message: 'Teacher not found'
+					 }
+				 }
+				 res.status(response.error.code).json(response)
+			 } else {
+
+				 let response = await twilio.sendSMS(teacher.phoneNumber)
+
+				 return res.status(200).json(response)
+			 }
+
+		 } catch (err) {
+			 let response = {
+				 error: {
+					 code: 500,
+					 message: err.message
+				 }
+			 }
+			 res.status(response.error.code).json(response)
+		 }
+	 },
+
+	 async authenticate(req, res) {
+		 try {
+			 req.checkBody('phoneNumber', 'Phone Number is required').notEmpty()
+			 req.checkBody('pin', 'Pin is required').notEmpty()
+
+			 let errors = await req.validationErrors()
+			 if (errors) {
+				 let response = {
+					 error: {
+						 code: 400,
+						 errors: errors
+					 }
+				 }
+				 res.status(response.error.code).json(response)
+			 }else{
+				 let verified = await twilio.verify(req.body.phoneNumber, req.body.pin)
+
+				 if (!verified) {
+
+					 let response = {
+						 error: {
+							 code: 500,
+							 message: "Invalid pin"
+						 }
+					 }
+					 res.status(response.error.code).json(response)
+
+				 } else {
+
+					 let credentials = {
+						 phoneNumber: req.body.phoneNumber,
+						 type: 'teacher'
+					 }
+
+					 let response = await jwt.generate(credentials)
+
+					 if (response.data) {
+						 return res.status(200).json(response)
+					 } else {
+						 return res.status(response.error.code).json(response)
+					 }
+
+				 }
+			 }
+		 } catch (err) {
+			 let response = {
+				 error: {
+					 code: 500,
+					 message: err
+				 }
+			 }
+			 console.log(err)
+			 res.status(response.error.code).json(response)
+		 }
+	 },
 
 
   async getProfile(req, res) {

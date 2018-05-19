@@ -1,5 +1,5 @@
 const request = require('request-promise')
-const API_KEY = '1bJBuwNhxiHBjZqbwnBy4XiOLtFx2fR2'
+const API_KEY = 'QzwS7b0Z9VhJvUN5jsXBA38K7JFhuJEo'
 
 module.exports.sendSMS = async (phoneNumber) => {
 	try {

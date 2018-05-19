@@ -8,6 +8,8 @@ const sessionController = require('../controllers/sessionController');
 
 // Routes for student user
 
+router.post('/getPin', sessionController.updateSessions, studentController.getPin);
+
 router.post('/authenticate', sessionController.updateSessions, studentController.authenticate);
 
 router.get('/profile', sessionController.updateSessions, studentController.getProfile);  // get the student's info
