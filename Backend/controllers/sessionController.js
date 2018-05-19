@@ -1,5 +1,6 @@
-var Student = require('../models/student');
+var Account = require('../models/account');
 var moment = require('moment');
+var Student = Account.base.models.Student
 
 const sessionController = {
 

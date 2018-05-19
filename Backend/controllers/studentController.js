@@ -1,7 +1,9 @@
-const Student = require('../models/student');
+const Account = require('../models/account');
 const jwt = require('../auth/jwt');
 // const twilio = require('../config/sms');
-
+var Admin = Account.base.models.Admin
+var Teacher = Account.base.models.Teacher
+var Student = Account.base.models.Student
 
 
 const studentController = {

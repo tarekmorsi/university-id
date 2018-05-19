@@ -1,6 +1,9 @@
-var Teacher = require('../models/teacher');
+var Account = require('../models/account');
 var Session = require('../models/session')
 var jwt = require('../auth/jwt');
+var Admin = Account.base.models.Admin
+var Teacher = Account.base.models.Teacher
+var Student = Account.base.models.Student
 
 
 var teacherController = {
@@ -100,7 +103,7 @@ var teacherController = {
 						msg: "Teacher not found"
 					})
 				} else {
-					let sessions = await Session.findSessionsAssignedToTeacher(teacher._id)
+					let sessions = await Session.findSessionsAssignedToTeacher(decoded._id)
 
 					if(sessions){
 						let response = {

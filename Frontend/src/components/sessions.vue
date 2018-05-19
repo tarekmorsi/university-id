@@ -3,12 +3,12 @@
     <div class="log-form">
       <h2>Sessions</h2>
 
-      <button type="button" v-on:click="add = true" class="btn btn-default" data-toggle="modal" data-target="#myModal">Add Sessions</button><br><br>
+      <button type="button" v-on:click="show = 1" class="btn btn-default" data-toggle="modal" data-target="#myModal">Add Sessions</button><br><br>
 
       <div class="ScrollStyle">
         <br>
-        <ul v-for="student in students">
-           <li><a style="cursor:pointer;" v-on:click="changeStudentForDisplay(student)" data-toggle="modal" data-target="#myModal">{{student.name}}</a></li><br>
+        <ul v-for="course in courses">
+           <li><a style="cursor:pointer;" v-on:click="changeCourseForDisplay(course)" data-toggle="modal" data-target="#myModal">{{course.title}}</a></li><br>
         </ul>
       </div>
 
@@ -23,12 +23,12 @@
 
       <!-- Modal content-->
       <div class="modal-content">
-        <div v-if="add == true"  class="modal-header">
+        <div v-if="show == 1"  class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title">Add Sessions</h4>
         </div>
         <div class="modal-body">
-          <form v-if="add == true"  @submit.prevent="addSessions">
+          <form v-if="show == 1"  @submit.prevent="addSessions">
             <input title="text" placeholder="Title" type="text" v-model="title" required/><br><br>
             <input type="text" title="location" placeholder="Location" v-model="location" required/><br><br>
 
@@ -60,6 +60,12 @@
 
 
             <div class="ScrollStyle2">
+              <div v-for="teacher in teachers">
+              <input type="radio" name="" v-bind:value="teacher._id" v-model="selected_teacher">  <label>{{teacher.name}}</label> <br>
+            </div>
+          </div><br><br>
+
+            <div class="ScrollStyle2">
               <div v-for="student in students">
               <input type="checkbox" name="" v-bind:value="student._id" v-model="selected_students">  <label>{{student.name}}</label> <br>
             </div>
@@ -70,18 +76,43 @@
 
             <button type="submit" class="btn btn-info">Add</button>
           </form>
-          <div v-if="add == false">
+          <div v-if="show == 2">
 
-            <h3>Student Info</h3>
-            <p>{{current_student.name}}</p>
+            <h3>Course Name</h3>
+            <p>{{current_course.title}}</p>
 
-            <h3> Sessions </h3>
-            <div class="ScrollStyle">
+            <h3> Tutorials </h3>
+            <div class="ScrollStyle3">
               <br>
-              <ul v-for="session in current_student.sessions">
-                 <li>{{session.title}} - {{session.start_date}} - {{session.chunk}} {{session.chunk_type}} - {{session.location}}</li><br>
+              <ul v-for="tutorial in current_course.tutorials">
+                 <li><a style="cursor:pointer;" v-on:click="changeTutorialForDisplay(tutorial)">{{tutorial.tutorial}}</a></li><br>
               </ul>
             </div>
+
+          </div>
+
+          <div v-if="show == 3">
+
+            <h3>Tutorial Name</h3>
+            <p>{{current_tutorial.tutorial}}</p>
+
+            <h3> Tutorials </h3>
+            <div class="ScrollStyle3">
+              <br>
+              <ul v-for="date in current_tutorial.dates">
+                 <li><a style="cursor:pointer;">{{date.start_date}}</a></li><br>
+              </ul>
+            </div>
+
+            <div class="ScrollStyle3">
+              <br>
+              <ul v-for="student in current_tutorial.students">
+                 <li><a style="cursor:pointer;">{{student.name}}</a></li><br>
+              </ul>
+            </div>
+
+            <br><br><a style="cursor:pointer;" v-on:click="show = 2">Back</a>
+
 
           </div>
         </div>
@@ -109,8 +140,11 @@ export default {
   data() {
     return {
       add: "",
+      courses: [],
       students: [],
-      current_student:"",
+      teachers:[],
+      current_course:"",
+      current_tutorial:"",
       title: "",
       chunk:"",
       chunk_type:"",
@@ -120,13 +154,18 @@ export default {
       day:"",
       location:"",
       reader_serial:"",
-      selected_students:[]
+      selected_students:[],
+      selected_teacher:"",
+      students_in_session: [],
+      show: 0,
 
     }
   },
   created() {
     this.url = env.URL
     this.fetchStudents()
+    this.fetchTeachers()
+    this.fetchSessions()
   },
 
   methods: {
@@ -139,6 +178,24 @@ export default {
         }
       })
     },
+    fetchTeachers: function() {
+      this.$http.get(env.URL + '/admin/teachers', {headers: auth.getAuthHeader()}).then((response) => {
+        if (response.body.data) {
+          this.teachers = response.body.data.teachers
+        } else {
+          this.error = response.body.msg
+        }
+      })
+    },
+    fetchSessions: function() {
+      this.$http.get(env.URL + '/admin/sessions', {headers: auth.getAuthHeader()}).then((response) => {
+        if (response.body.data) {
+          this.courses = response.body.data.sessions
+        } else {
+          this.error = response.body.msg
+        }
+      })
+    },
     logout: function() {
       auth.logout();
     },
@@ -146,12 +203,12 @@ export default {
     addSessions: function() {
       console.log(this.selected_students)
       var hour = Number(this.time.slice(0, 2))
-      // if(hour+2>24){
-      //   var hour_total = hour + 2
-      //   hour = hour_total - 24
-      // }else{
-      //   hour = hour +2
-      // }
+      if(hour+2>24){
+        var hour_total = hour + 2
+        hour = hour_total - 24
+      }else{
+        hour = hour +2
+      }
 
       this.$http.post(env.URL + '/admin/sessions', {
       	title: this.title,
@@ -165,8 +222,8 @@ export default {
         semester_end: this.semester_end,
         reader_serial: this.reader_serial,
         students: this.selected_students,
+        teacher: this.selected_teacher
       }, {headers: auth.getAuthHeader()}).then((response) => {
-            console.log(response)
             if(response.data){
               alertify.notify("Sessions added", 'success', 5);
               this.fetchStudents()
@@ -174,7 +231,6 @@ export default {
               alertify.notify(response.body.msg, 'error', 5);
             }
            }).catch((error) => {
-             console.log(error)
              if(error.body.error.message != null && error.body.error.message != undefined){
                alertify.notify(error.body.error.message, 'error', 5);
              }
@@ -182,14 +238,19 @@ export default {
      },
 
 
-    changeStudentForDisplay: function(student) {
-      this.add = false;
-      this.current_student = student;
+    changeCourseForDisplay: function(course) {
+      this.show = 2;
+      this.current_course = course;
     },
 
     changeStudentForDelete: function(student) {
       this.current_student = student;
       this.deleteStudent()
+    },
+
+    changeTutorialForDisplay: function(tutorial){
+      this.current_tutorial = tutorial;
+      this.show = 3
     }
   },
   components: {
@@ -214,6 +275,14 @@ export default {
     max-height: 150px;
     overflow-y: scroll;
     width: 40%;
+    margin: 0 auto;
+}
+.ScrollStyle3
+{
+    border:1px solid black;
+    max-height: 150px;
+    overflow-y: scroll;
+    width: 100%;
     margin: 0 auto;
 }
 </style>

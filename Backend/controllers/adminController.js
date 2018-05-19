@@ -1,12 +1,12 @@
-var Admin = require('../models/admin');
-var Student = require('../models/student');
+var Account = require('../models/account');
 var Session = require('../models/session');
-var Teacher = require('../models/teacher');
 var jwt = require('../auth/jwt');
-
+var Admin = Account.base.models.Admin
+var Teacher = Account.base.models.Teacher
+var Student = Account.base.models.Student
 
 //Default Admin
-
+// console.log(Account.base.models.Admin)
 Admin.findOne({
   email: 'admin@gmail.com'
 }, (err, admin) => {
@@ -162,7 +162,7 @@ var adminController = {
   			const token = req.headers['jwt-token']
   			let decoded = await jwt.verify(token)
   			if (decoded) {
-  				let sessions = await Session.find()
+  				let sessions = await Session.getAllSessions()
   				let response = {
   					data: {
   						sessions
@@ -437,8 +437,19 @@ var adminController = {
   			const token = req.headers['jwt-token'];
    			let decoded = await jwt.verify(token)
    			if (decoded) {
-  				await Teacher.deleteTeacher(req.params.id)
-  				res.status(204).json()
+          let teacher = await Teacher.getTeacherById(req.params.id)
+          if(teacher){
+            await Teacher.deleteTeacher(req.params.id)
+            res.status(204).json()
+          }else{
+            let response = {
+      				error: {
+      					code: 404,
+      					message: "Teacher not found."
+      				}
+      			}
+      			res.status(response.error.code).json(response)
+          }
   			} else {
   				let response = {
   					error: {

@@ -13,6 +13,7 @@
   <div v-else class="home" style="text-align:center;">
     <div class="log-form">
       <router-link to="/students"> <a style="cursor:pointer;">Students</a></router-link><br>
+      <router-link to="/teachers"> <a style="cursor:pointer;">Teachers</a></router-link><br>
       <router-link to="/sessions"> <a style="cursor:pointer;">Sessions</a></router-link><br>
       <router-link to="/"> <a style="cursor:pointer;"@click="logout">Logout</a></router-link>
     </div><!--end log form -->

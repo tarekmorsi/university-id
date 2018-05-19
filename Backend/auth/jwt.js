@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
-const Admin = require('../models/admin')
-const Student = require('../models/student')
-const Teacher = require('../models/teacher')
+const Account = require('../models/account')
+var Admin = Account.base.models.Admin
+var Teacher = Account.base.models.Teacher
+var Student = Account.base.models.Student
 const secret = 'ilovescotchscotchyscotchscotch'
 const secretStudent = 'demodemopassappdemodemodemopass'
 const secretAccount = 'Account'
@@ -90,6 +91,7 @@ module.exports = {
 				}
 			}
 		} catch (err) {
+			console.log(err)
 			let response = {
 				error: {
 					code: 500,

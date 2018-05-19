@@ -7,6 +7,7 @@ import auth from '../auth'
 
 import home from '@/components/home'
 import students from '@/components/students'
+import teachers from '@/components/teachers'
 import sessions from '@/components/sessions'
 
 
@@ -24,6 +25,18 @@ export default new Router({
       path: '/students/',
       name: 'students',
       component: students,
+      beforeEnter: (to, from, next) => {
+        auth.checkAuth()
+        if (!auth.user.authenticated) {
+          next('/');
+        } else {
+          next()
+        }
+      }
+    },{
+      path: '/teachers/',
+      name: 'teachers',
+      component: teachers,
       beforeEnter: (to, from, next) => {
         auth.checkAuth()
         if (!auth.user.authenticated) {
